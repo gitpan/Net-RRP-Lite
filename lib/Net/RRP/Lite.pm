@@ -2,7 +2,7 @@ package Net::RRP::Lite;
 
 use strict;
 use vars qw($VERSION $DEBUG);
-$VERSION = '0.01';
+$VERSION = '0.02';
 $DEBUG = 0;
 use Net::RRP::Lite::Response;
 
@@ -22,7 +22,8 @@ sub new {
 sub connect {
     my($class, %args) = @_;
     require IO::Socket::SSL;
-    my $sock = IO::Socket::SSL->new(%args);
+    my $sock = IO::Socket::SSL->new(%args) 
+	or _croak("could not make socket:$!");
     return $class->new($sock);
 }
 
@@ -71,7 +72,7 @@ sub _read_until {
 	$buf .= $line;
 	if ($buf =~ m/$stop/s) {
 	    if ($DEBUG) {
-		warn "[READ] $_\r\n" for(split(/\r\n/, $`));
+		warn "S:$_\r\n" for(split(/\r\n/, $`));
 	    }
 	    return $`;
 	}
@@ -81,7 +82,7 @@ sub _read_until {
 
 sub _write_sock {
     my($self, $data) = @_;
-    warn "[WRITE] $data" if $DEBUG;
+    warn "C:$data" if $DEBUG;
     $self->{_sock}->print($data);
 }
 

@@ -5,3 +5,4 @@ README
 lib/Net/RRP/Lite.pm
 lib/Net/RRP/Lite/Response.pm
 t/00_compile.t
+t/01_response.t

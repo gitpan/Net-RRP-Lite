@@ -23,8 +23,18 @@ sub _initialize {
     my %vars;
     for my $line(@lines) {
 	my($key, $val) = split(/\s*:\s*/, $line, 2);
-	$self->param($key => $val);
+	unless ($vars{lc($key)}) {
+	    $vars{lc($key)} = $val
+	}
+	elsif (ref($vars{lc($key)}) eq 'ARRAY') {
+	    push @{$vars{lc($key)}}, $val;
+	} 
+	else{
+	    $vars{lc($key)} = [ $vars{lc($key)} ];
+	    push @{$vars{lc($key)}}, $val;
+	}
     }
+    $self->{_param} = \%vars;
     return $self;
 }
 
@@ -34,8 +44,12 @@ sub param {
         return keys %{$self->{_param}};
     }
     elsif (@_ == 1) {
-	$_[0] =~ s/_/ /g;
-        return $self->{_param}->{$_[0]};
+	my $key = lc($_[0]);
+	$key =~ s/_/ /g;
+	if (ref($self->{_param}->{$key}) eq 'ARRAY') {
+	    return wantarray ? @{$self->{_param}->{$key}} : $self->{_param}->{$key};
+	}
+        return $self->{_param}->{$key};
     }
     else {
         $self->{_param}->{$_[0]} = $_[1];
